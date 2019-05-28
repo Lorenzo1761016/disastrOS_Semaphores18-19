@@ -5,6 +5,7 @@
 #include "disastrOS_syscalls.h"
 #include "disastrOS_semaphore.h"
 #include "disastrOS_semdescriptor.h"
+#include "disastrOS_globals.h"
 
 void internal_semOpen(){
   int semnum = running -> syscall_args[0]; //IL PRIMO ARGOMENTO DELLA SYSCALL E' L'ID DEL SEMAFORO
@@ -14,17 +15,18 @@ void internal_semOpen(){
   
   Semaphore* aux = SemaphoreList_byId(&semaphores_list,semnum); //VERIFICO SE IL SEMAFORO (SEMNUM) E' GIA' PRESENTE NELLA LISTA DEI SEMAFORI
   
-  if (aux = NULL) {
-	  Semaphore* sem = Semaphore_alloc(semnum,counter);  //SE IL SEMAFORO (SEMNUM) NON ESISTE LO ALLOCO
-	  List_insert(&semaphores_list,semaphores_list.last,sem); //INSERISCO IL SEMAFORO (SEMNUM) ALLA LISTA DEI SEMAFORI
+  if (aux == NULL) {
+	  aux = Semaphore_alloc(semnum,counter);  //SE IL SEMAFORO (SEMNUM) NON ESISTE LO ALLOCO
+	  List_insert(&semaphores_list,semaphores_list.last,aux); //INSERISCO IL SEMAFORO (SEMNUM) ALLA LISTA DEI SEMAFORI
 	  }
-  SemDescriptor* sfd = SemDescriptor_alloc(running -> last_sem_fd, sem, running); //IN OGNI CASO ALLOCO IL DESCRIPTOR DEL SEMAFORO (SEMNUM)
+
+  SemDescriptor* sfd = SemDescriptor_alloc(running -> last_sem_fd, aux, running); //IN OGNI CASO ALLOCO IL DESCRIPTOR DEL SEMAFORO (SEMNUM)
 	  
 	 
 	  
   SemDescriptorPtr* sfdptr = SemDescriptorPtr_alloc(sfd); //ALLOCO IL PUNTATORE AL DESCRITTORE (SFD) DEL SEMAFORO (SEMNUM) 
   
-  List_insert(running->sem_descriptors, sem_descriptors.last, sfdptr); //AGGIUNGO IL PUNTATORE SFDPTR ALLA LISTA DEI PUNTATORI AI DESCRITTORI DEI SEMAFORI
+  List_insert(&running->sem_descriptors, &running->sem_descriptors.last, sfdptr); //AGGIUNGO IL PUNTATORE SFDPTR ALLA LISTA DEI PUNTATORI AI DESCRITTORI DEI SEMAFORI
 	
   printf("Fatto!\n");	  
 }

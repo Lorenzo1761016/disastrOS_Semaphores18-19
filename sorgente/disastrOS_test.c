@@ -74,5 +74,6 @@ int main(int argc, char** argv){
   // spawn an init process
   printf("start\n");
   disastrOS_start(initFunction, 0, logfilename);
+  
   return 0;
 }

@@ -10,13 +10,13 @@ void internal_semClose(){
   int semnum = running->syscall_args[0]; 
   
   printf("Chiudo il semaforo %d...",semnum);
-  SemDescriptor* sfd = SemDescriptorList_byFd(running->sem_descriptors,semnum); //RICERCO IL DESCRITTORE DEL SEMAFORO DALLA LISTA DEL PROCESSO
+  SemDescriptor* sfd = SemDescriptorList_byFd(&running->sem_descriptors,semnum); //RICERCO IL DESCRITTORE DEL SEMAFORO DALLA LISTA DEL PROCESSO
  
-  List_detach(running->sem_descriptors,sfd); //LO RIMUOVO DALLA LISTA
+  List_detach(&running->sem_descriptors,sfd); //LO RIMUOVO DALLA LISTA
   
   Semaphore* sem = sfd->semaphore;
   
-  List_detach(sem->descriptors,sfd->ptr); //RIMUOVO IL PUNTATORE AL DESCRITTORE DALLA LISTA INTERNA AL SEMAFORO 
+  List_detach(&sem->descriptors,sfd->ptr); //RIMUOVO IL PUNTATORE AL DESCRITTORE DALLA LISTA INTERNA AL SEMAFORO 
   
   printf("Fatto!\n");
   
