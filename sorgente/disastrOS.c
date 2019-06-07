@@ -146,6 +146,8 @@ void disastrOS_start(void (*f)(void*), void* f_args, char* logfile){
   Timer_init();
   Resource_init();
   Descriptor_init();
+  Semaphore_init(); //INIZIALIZZO LO SPAZIO PER I SEMAFORI
+  SemDescriptor_init(); //INIZIALIZZO LO SPAZIO PER I DESCRITTORI DEI SEMAFORI
   init_pcb=0;
 
   // populate the vector of syscalls and number of arguments for each syscall
@@ -311,7 +313,7 @@ int disastrOS_semOpen(int id, int count){
 	return disastrOS_syscall(DSOS_CALL_SEMOPEN,id,count);
 }
 
-//WRAPPER CHE GESTISCE LA SEMOPEN IN DISASTROS
+//WRAPPER CHE GESTISCE LA SEMCLOSE IN DISASTROS
 void disastrOS_semClose(int id){
 	return disastrOS_syscall(DSOS_CALL_SEMCLOSE,id);
 }

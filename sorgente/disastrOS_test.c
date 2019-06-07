@@ -50,6 +50,7 @@ void initFunction(void* args) {
   }
 
   disastrOS_printStatus();
+  
   int retval;
   int pid;
   while(alive_children>0 && (pid=disastrOS_wait(0, &retval))>=0){ 
@@ -60,6 +61,12 @@ void initFunction(void* args) {
   }
   printf("shutdown!");
   disastrOS_shutdown();
+}
+
+void test_sem(){
+	int i;
+	disastrOS_semOpen(0,1);
+	disastrOS_printStatus();
 }
 
 int main(int argc, char** argv){
@@ -73,7 +80,7 @@ int main(int argc, char** argv){
   printf("the function pointer is: %p", childFunction);
   // spawn an init process
   printf("start\n");
-  disastrOS_start(initFunction, 0, logfilename);
-  
+  disastrOS_start(test_sem, 0, logfilename);
+  //disastrOS_start(initFunction, 0, logfilename);
   return 0;
 }
