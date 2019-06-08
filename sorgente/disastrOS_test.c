@@ -21,11 +21,15 @@ void childFunction(void* args){
   int fd=disastrOS_openResource(disastrOS_getpid(),type,mode);
   printf("fd=%d\n", fd);
   printf("PID: %d, terminating\n", disastrOS_getpid());
+  
+  int sem = disastrOS_semOpen(1,0); //TEST DI APERTURA SEMAFORO
 
   for (int i=0; i<(disastrOS_getpid()+1); ++i){
     printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
     disastrOS_sleep((20-disastrOS_getpid())*5);
   }
+  
+  disastrOS_semClose(sem); //TEST DI CHIUSURA SEMAFORO
   disastrOS_exit(disastrOS_getpid()+1);
 }
 
@@ -63,11 +67,6 @@ void initFunction(void* args) {
   disastrOS_shutdown();
 }
 
-void test_sem(){
-	int i;
-	disastrOS_semOpen(0,1);
-	disastrOS_printStatus();
-}
 
 int main(int argc, char** argv){
   char* logfilename=0;
@@ -80,7 +79,7 @@ int main(int argc, char** argv){
   printf("the function pointer is: %p", childFunction);
   // spawn an init process
   printf("start\n");
-  disastrOS_start(test_sem, 0, logfilename);
+  disastrOS_start(initFunction, 0, logfilename);
   //disastrOS_start(initFunction, 0, logfilename);
   return 0;
 }

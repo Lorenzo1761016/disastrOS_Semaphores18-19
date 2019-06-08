@@ -11,8 +11,10 @@ void internal_semOpen(){
   int semnum = running -> syscall_args[0]; //IL PRIMO ARGOMENTO DELLA SYSCALL E' L'ID DEL SEMAFORO
   int counter = running -> syscall_args[1]; //IL SECONDO ARGOMENTO DELLA SYSCALL E' IL COUNTER DEL SEMAFORO (SEMNUM)
   
+  
+  
   if (semnum < 0){
-	  disastrOS_debug("errore id semaforo");
+	  printf("Errore id semaforo");
 	  return;
   }
   

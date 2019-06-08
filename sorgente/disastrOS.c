@@ -314,7 +314,7 @@ int disastrOS_semOpen(int id, int count){
 }
 
 //WRAPPER CHE GESTISCE LA SEMCLOSE IN DISASTROS
-void disastrOS_semClose(int id){
+int disastrOS_semClose(int id){
 	return disastrOS_syscall(DSOS_CALL_SEMCLOSE,id);
 }
 
