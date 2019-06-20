@@ -22,7 +22,7 @@ void childFunction(void* args){
   printf("fd=%d\n", fd);
   printf("PID: %d, terminating\n", disastrOS_getpid());
   
-  int sem = disastrOS_semOpen(1,0); //TEST DI APERTURA SEMAFORO
+  int sem = disastrOS_semOpen(disastrOS_getpid(),0); //TEST DI APERTURA SEMAFORO
 
   for (int i=0; i<(disastrOS_getpid()+1); ++i){
     printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
