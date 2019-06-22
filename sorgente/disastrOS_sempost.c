@@ -9,6 +9,7 @@
 void internal_semPost(){
   int sd = running->syscall_args[0];
   
+  printf("POST...\n");
   SemDescriptor* sfd = SemDescriptorList_byFd(&running->sem_descriptors,sd); //RICERCO IL DESCRITTORE DEL SEMAFORO NELLA LISTA DEL PCB
   
   //VERIFICO CHE SIA PRESENTE, ALTRIMENTI TERMINO

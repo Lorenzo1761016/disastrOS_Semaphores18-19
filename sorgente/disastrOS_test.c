@@ -25,8 +25,10 @@ void childFunction(void* args){
   int sem = disastrOS_semOpen(disastrOS_getpid(),0); //TEST DI APERTURA SEMAFORO
 
   for (int i=0; i<(disastrOS_getpid()+1); ++i){
+	disastrOS_semWait(sem); //TEST SEMWAIT
     printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
     disastrOS_sleep((20-disastrOS_getpid())*5);
+    disastrOS_semPost(sem); // TEST SEMPOST
   }
   
   disastrOS_semClose(sem); //TEST DI CHIUSURA SEMAFORO

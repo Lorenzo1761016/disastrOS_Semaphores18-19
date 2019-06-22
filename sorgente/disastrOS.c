@@ -323,6 +323,11 @@ int disastrOS_semPost(int id){
 	return disastrOS_syscall(DSOS_CALL_SEMPOST,id);
 }
 
+//WRAPPER PER LA SEMWAIT
+int disastrOS_semWait(int id){
+	return disastrOS_syscall(DSOS_CALL_SEMWAIT,id);
+}
+
 
 void disastrOS_printStatus(){
   printf("****************** DisastrOS ******************\n");
