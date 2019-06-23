@@ -25,7 +25,7 @@ void internal_semOpen(){
   if (aux == NULL) {
 	  aux = Semaphore_alloc(semnum,counter);  //SE IL SEMAFORO (SEMNUM) NON ESISTE LO ALLOCO
 	  if(!aux){
-		  printf("allocazione semaforo fallita");
+		  printf("ERRORE: Allocazione semaforo fallita\n");
 		  return;
 	  }
 	  List_insert(&semaphores_list,semaphores_list.last,(ListItem*)aux); //INSERISCO IL SEMAFORO (SEMNUM) ALLA LISTA DEI SEMAFORI
@@ -35,7 +35,7 @@ void internal_semOpen(){
 	
   //CONTROLLO CHE L'ALLOCAZIONE SIA RIUSCITA	
   if(!sfd){
-	  printf("Errore allocazione descriptor del semaforo");
+	  printf("ERRORE: Allocazione descriptor del semaforo fallita\n");
 	  return;
   }
 
@@ -43,7 +43,7 @@ void internal_semOpen(){
   
   //CONTROLLO CHE L'ALLOCAZIONE SIA RIUSCITA
   if(!sfdptr) {
-	  printf("Errore allocazione puntatore al descrittore del semaforo");
+	  printf("ERRORE: Allocazione puntatore al descrittore del semaforo fallita\n");
 	  return;
   }
   
@@ -53,7 +53,7 @@ void internal_semOpen(){
   
   sfd->ptr = sfdptr; //INSERISCO IL PUNTATORE AL DESCRITTORE ALL'INTERNO DELLA STRUCT DELL DESCRITTORE
   
-  List_insert(&aux->descriptors,aux->descriptors.last,(ListItem*)sfdptr);  //AGGIUNGO IL PUNTATORE AL DESCRITTORE DEL SEMAFORO NELLA LISTA DEI DESCRITTORI DEL SEMAFORO CORRENTE
+  List_insert(&aux->descriptors,aux->descriptors.last,(ListItem*)(sfd->ptr));  //AGGIUNGO IL PUNTATORE AL DESCRITTORE DEL SEMAFORO NELLA LISTA DEI DESCRITTORI DEL SEMAFORO CORRENTE
   
   running->syscall_retvalue = sfd->fd; //ASSEGNO COME VALORE DI RITORNO DELLA SYSCALL IL FILE DESCRIPTOR DEL SEMAFORO 
 	

@@ -1,8 +1,13 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <poll.h>
-
 #include "disastrOS.h"
+
+#define BUFFER_LENGTH 10
+
+int buffer[BUFFER_LENGTH];
+int write_index = 0;
+int read_index = 0;
+int var = 0;
 
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
@@ -21,17 +26,58 @@ void childFunction(void* args){
   int fd=disastrOS_openResource(disastrOS_getpid(),type,mode);
   printf("fd=%d\n", fd);
   printf("PID: %d, terminating\n", disastrOS_getpid());
-  
-  int sem = disastrOS_semOpen(disastrOS_getpid(),0); //TEST DI APERTURA SEMAFORO
+    
+  printf("APERTURA SEMAFORI...\n");
+   //TEST DI APERTURA SEMAFORI
+  int empty_sem = disastrOS_semOpen(1,0);
+  int full_sem = disastrOS_semOpen(2,10);
+  int read_sem = disastrOS_semOpen(3,1);
+  int write_sem = disastrOS_semOpen(4,1);
 
-  for (int i=0; i<(disastrOS_getpid()+1); ++i){
-	disastrOS_semWait(sem); //TEST SEMWAIT
-    printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);
-    disastrOS_sleep((20-disastrOS_getpid())*5);
-    disastrOS_semPost(sem); // TEST SEMPOST
-  }
+  for (int i=0; i<10; ++i){  
+	
+    printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);  
+    
+    //SE IL PID DEL FIGLIO E' UN NUMERO PARI ESEGUO UNA SCRITTURA ALL'INTERNO DEL BUFFER
+    if(disastrOS_getpid()%2 == 0){
+		disastrOS_semWait(full_sem);
+		disastrOS_semWait(write_sem);
+		
+		//SEZIONE CRITICA DI SCRITTURA	
+		printf("[WRITE] SCRIVO NEL BUFFER IL VALORE: %d\n", var);
+		buffer[write_index] = var;
+		write_index = (write_index+1)%BUFFER_LENGTH; //UTILIZZO UN BUFFER CIRCOLARE
+		var++;
+		
+		disastrOS_sleep(15);
+		
+		disastrOS_semPost(write_sem);
+		disastrOS_semPost(full_sem);
+	}
+	//SE IL PID DEL FIGLIO E' INVECE DISPARI ESEGUO UNA LETTURA ALL'INTERNO DEL BUFFER
+	else{ 
+		disastrOS_semWait(empty_sem);
+		disastrOS_semWait(read_sem);
+		
+		//SEZIONE CRITICA DI LETTURA
+		int val = buffer[read_index];
+		read_index = (read_index+1)%BUFFER_LENGTH; // UTILIZZO UN BUFFER CIRCOLARE
+		
+		printf("[READ] VALORE LETTO DAL BUFFER: %d\n", val);
+		
+		disastrOS_semPost(read_sem);
+		disastrOS_semPost(empty_sem);
+		}
+	}
+		
+		
   
-  disastrOS_semClose(sem); //TEST DI CHIUSURA SEMAFORO
+  printf("CHIUSURA SEMAFORI...\n");
+  //TEST DI CHIUSURA SEMAFORI
+  disastrOS_semClose(empty_sem); 
+  disastrOS_semClose(full_sem); 
+  disastrOS_semClose(read_sem); 
+  disastrOS_semClose(write_sem); 
   disastrOS_exit(disastrOS_getpid()+1);
 }
 

@@ -314,18 +314,18 @@ int disastrOS_semOpen(int id, int count){
 }
 
 //WRAPPER PER LA SEMCLOSE
-int disastrOS_semClose(int id){
-	return disastrOS_syscall(DSOS_CALL_SEMCLOSE,id);
+int disastrOS_semClose(int fd){
+	return disastrOS_syscall(DSOS_CALL_SEMCLOSE,fd);
 }
 
 //WRAPPER PER LA SEMPOST
-int disastrOS_semPost(int id){
-	return disastrOS_syscall(DSOS_CALL_SEMPOST,id);
+int disastrOS_semPost(int fd){
+	return disastrOS_syscall(DSOS_CALL_SEMPOST,fd);
 }
 
 //WRAPPER PER LA SEMWAIT
-int disastrOS_semWait(int id){
-	return disastrOS_syscall(DSOS_CALL_SEMWAIT,id);
+int disastrOS_semWait(int fd){
+	return disastrOS_syscall(DSOS_CALL_SEMWAIT,fd);
 }
 
 

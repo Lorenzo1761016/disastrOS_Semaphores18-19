@@ -9,16 +9,17 @@
 void internal_semWait(){
   int sd = running->syscall_args[0];
   
-  printf("WAIT...\n");
-  SemDescriptor* sfd = SemDescriptorList_byFd(&running->sem_descriptors,sd);
+  SemDescriptor* sfd = SemDescriptorList_byFd(&running->sem_descriptors,sd); //RICERCO IL DESCRITTORE DEL SEMAFORO NELLA LISTA DEL PCB
   
+  //VERIFICO CHE SIA PRESENTE, ALTRIMENTI TERMINO
   if(!sfd){
 	  printf("ERRORE: Il file descriptor %d non esiste\n",sd);
 	  return;
   }
   
+  //MI ASSICURO CHE IL CONTATORE SIA MAGGIORE DI 0, ALTRIMENTI NON POSSO DECREMENTARLO
   if((sfd->semaphore)->count > 0){
-	  (sfd->semaphore)->count --;
+	  (sfd->semaphore)->count--;
   }
   else{
 	  printf("Wait fallita\n");
@@ -26,6 +27,6 @@ void internal_semWait(){
 	  return;
   }
   
-  running->syscall_retvalue = 0;
+  running->syscall_retvalue = 0; //ASSEGNO UN VALORE DI RITORNO ALLA SYSCALL
   return;
 }
