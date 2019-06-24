@@ -20,6 +20,12 @@ void internal_semPost(){
   
   (sfd->semaphore)->count++;  //INCREMENTO IL SUO CONTATORE
   
+  //SE IL CONTATORE DEL SEMAFORO E' MINORE DI SPOSTO IL SUO DESCRITTORE NELLA LISTA DI READY
+  if((sfd->semaphore)->count < 0){
+	  List_detach(&(sfd->semaphore)->waiting_descriptors,(sfd->semaphore)->waiting_descriptors.last);
+	  List_insert(&(sfd->semaphore)->descriptors,(sfd->semaphore)->descriptors.last,(sfd->semaphore)->waiting_descriptors.last);
+  }
+  
   //SETTO IL VALORE DI RITORNO DELLA SYSCALL
   running->syscall_retvalue = 0;
   return;

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "disastrOS.h"
+#include "disastrOS.c"
 
 #define BUFFER_LENGTH 10
 

@@ -16,16 +16,14 @@ void internal_semWait(){
 	  printf("ERRORE: Il file descriptor %d non esiste\n",sd);
 	  return;
   }
+  (sfd->semaphore)->count--;
   
-  //MI ASSICURO CHE IL CONTATORE SIA MAGGIORE DI 0, ALTRIMENTI NON POSSO DECREMENTARLO
-  if((sfd->semaphore)->count > 0){
-	  (sfd->semaphore)->count--;
+  //SE IL CONTATORE DEL SEMAFORO SCENDE SOTTO LO ZERO SPOSTO IL SUO DESCRITTORE NELLA LISTA DI WAITING
+  if((sfd->semaphore)->count < 0){
+	  List_detach(&sfd->semaphore->descriptors,(ListItem*)sfd->ptr);
+	  List_insert(&(sfd->semaphore)->waiting_descriptors,(sfd->semaphore)->waiting_descriptors.last,(ListItem*)sfd->ptr);
   }
-  else{
-	  printf("Wait fallita\n");
-	  running->syscall_retvalue = -1;
-	  return;
-  }
+ 
   
   running->syscall_retvalue = 0; //ASSEGNO UN VALORE DI RITORNO ALLA SYSCALL
   return;
