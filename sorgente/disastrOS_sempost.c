@@ -22,10 +22,17 @@ void internal_semPost(){
   
   //SE IL CONTATORE DEL SEMAFORO E' MINORE DI SPOSTO IL SUO DESCRITTORE NELLA LISTA DI READY
   if((sfd->semaphore)->count < 0){
-	  List_detach(&(sfd->semaphore)->waiting_descriptors,(sfd->semaphore)->waiting_descriptors.last);
-	  List_insert(&(sfd->semaphore)->descriptors,(sfd->semaphore)->descriptors.last,(sfd->semaphore)->waiting_descriptors.last);
+	  SemDescriptorPtr* ptr_aux = (SemDescriptorPtr*)List_detach(&(sfd->semaphore)->waiting_descriptors,(sfd->semaphore)->waiting_descriptors.first);
+	  List_insert(&(sfd->semaphore)->descriptors,(sfd->semaphore)->descriptors.last,(ListItem*)ptr_aux);
+
+	  //IMPOSTO LO STATO DEL PCB DEL PROCESSO IN READY
+	  PCB* exec_PCB = ptr_aux->descriptor->pcb;
+	  exec_PCB->status = 0x2;
+	  
+	  //SPOSTO IL PCB DEL PROCESSO NELLA READY QUEUE DEL SISTEMA OPERATIVO
+	  List_detach(&waiting_list,(ListItem*)exec_PCB);
+	  List_insert(&ready_list,ready_list.last,(ListItem*)exec_PCB);
   }
-  
   //SETTO IL VALORE DI RITORNO DELLA SYSCALL
   running->syscall_retvalue = 0;
   return;
