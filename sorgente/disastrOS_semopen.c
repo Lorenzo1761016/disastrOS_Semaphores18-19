@@ -49,7 +49,7 @@ void internal_semOpen(){
   
   List_insert(&running->sem_descriptors, running->sem_descriptors.last, (ListItem*)sfd); //AGGIUNGO IL DESCRITTORE SFD ALLA LISTA DEI DESCRITTORI DEI SEMAFORI
   
-  running->last_sem_fd++; //INCREMENTO IL CONTATORE INTERNO AL PCB DEI SEMAFORI APERTI
+  (running->last_sem_fd)++; //INCREMENTO IL CONTATORE INTERNO AL PCB DEI SEMAFORI APERTI
   
   sfd->ptr = sfdptr; //INSERISCO IL PUNTATORE AL DESCRITTORE ALL'INTERNO DELLA STRUCT DELL DESCRITTORE
   

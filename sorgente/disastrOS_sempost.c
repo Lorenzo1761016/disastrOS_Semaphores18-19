@@ -9,6 +9,11 @@
 void internal_semPost(){
   int sd = running->syscall_args[0];
   
+  if(sd < 0) {
+	  printf("ERRRR\n");
+	  return;
+  }
+  
   SemDescriptor* sfd = SemDescriptorList_byFd(&running->sem_descriptors,sd); //RICERCO IL DESCRITTORE DEL SEMAFORO NELLA LISTA DEL PCB
   
   //VERIFICO CHE SIA PRESENTE, ALTRIMENTI TERMINO
@@ -19,15 +24,18 @@ void internal_semPost(){
   }
   
   (sfd->semaphore)->count++;  //INCREMENTO IL SUO CONTATORE
+  printf("[POST] Processo: %d - Semaforo: %d - Valore: %d\n", disastrOS_getpid(),(sfd->semaphore)->id, (sfd->semaphore)->count);
   
-  //SE IL CONTATORE DEL SEMAFORO E' MINORE DI SPOSTO IL SUO DESCRITTORE NELLA LISTA DI READY
-  if((sfd->semaphore)->count < 0){
+  //VERIFICO SE IL CONTATORE DEL SEMAFORO E' MINORE DI ZERO
+  if((sfd->semaphore)->count <= 0){
+	  
+	  //SPOSTO IL SUO DESCRITTORE NELLA LISTA DI READY
 	  SemDescriptorPtr* ptr_aux = (SemDescriptorPtr*)List_detach(&(sfd->semaphore)->waiting_descriptors,(sfd->semaphore)->waiting_descriptors.first);
 	  List_insert(&(sfd->semaphore)->descriptors,(sfd->semaphore)->descriptors.last,(ListItem*)ptr_aux);
 
 	  //IMPOSTO LO STATO DEL PCB DEL PROCESSO IN READY
 	  PCB* exec_PCB = ptr_aux->descriptor->pcb;
-	  exec_PCB->status = 0x2;
+	  exec_PCB->status = Ready;
 	  
 	  //SPOSTO IL PCB DEL PROCESSO NELLA READY QUEUE DEL SISTEMA OPERATIVO
 	  List_detach(&waiting_list,(ListItem*)exec_PCB);

@@ -3,7 +3,7 @@
 #include "disastrOS.h"
 #include "disastrOS.c"
 
-#define BUFFER_LENGTH 10
+#define BUFFER_LENGTH 50
 
 int buffer[BUFFER_LENGTH];
 int write_index = 0;
@@ -31,7 +31,7 @@ void childFunction(void* args){
   printf("APERTURA SEMAFORI...\n");
    //TEST DI APERTURA SEMAFORI
   int empty_sem = disastrOS_semOpen(1,0);
-  int full_sem = disastrOS_semOpen(2,10);
+  int full_sem = disastrOS_semOpen(2,BUFFER_LENGTH);
   int read_sem = disastrOS_semOpen(3,1);
   int write_sem = disastrOS_semOpen(4,1);
 
@@ -45,29 +45,31 @@ void childFunction(void* args){
 		disastrOS_semWait(write_sem);
 		
 		//SEZIONE CRITICA DI SCRITTURA	
-		printf("[WRITE] SCRIVO NEL BUFFER IL VALORE: %d\n", var);
+		printf("[WRITE] SCRIVO NELLA CELLA %d DEL BUFFER IL VALORE: %d\n",write_index, var);
 		buffer[write_index] = var;
 		write_index = (write_index+1)%BUFFER_LENGTH; //UTILIZZO UN BUFFER CIRCOLARE
 		var++;
 		
-		disastrOS_sleep(15);
+		disastrOS_sleep(3);
 		
 		disastrOS_semPost(write_sem);
-		disastrOS_semPost(full_sem);
+		disastrOS_semPost(empty_sem);
 	}
 	//SE IL PID DEL FIGLIO E' INVECE DISPARI ESEGUO UNA LETTURA ALL'INTERNO DEL BUFFER
 	else{ 
 		disastrOS_semWait(empty_sem);
 		disastrOS_semWait(read_sem);
 		
+		disastrOS_sleep(3);
+		
 		//SEZIONE CRITICA DI LETTURA
 		int val = buffer[read_index];
 		read_index = (read_index+1)%BUFFER_LENGTH; // UTILIZZO UN BUFFER CIRCOLARE
 		
-		printf("[READ] VALORE LETTO DAL BUFFER: %d\n", val);
+		printf("[READ] VALORE LETTO NELLA CELLA %d DEL BUFFER: %d\n", read_index,val);
 		
 		disastrOS_semPost(read_sem);
-		disastrOS_semPost(empty_sem);
+		disastrOS_semPost(full_sem);
 		}
 	}
 		
