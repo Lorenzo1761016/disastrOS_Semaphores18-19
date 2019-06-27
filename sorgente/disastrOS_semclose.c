@@ -18,17 +18,43 @@ void internal_semClose(){
 	  return;
   }
  
-  List_detach(&running->sem_descriptors,(ListItem*)sfd); //LO RIMUOVO DALLA LISTA
+  sfd = (SemDescriptor*)List_detach(&running->sem_descriptors,(ListItem*)sfd); //LO RIMUOVO DALLA LISTA DEI DESCRITTORI DEL PROCESSO
   
   Semaphore* sem = sfd->semaphore;  //RICHIAMO IL SEMAFORO ASSOCIATO AL DESCRITTORE
+ 
   
   SemDescriptorPtr* sdptr = (SemDescriptorPtr*)List_detach(&sem->descriptors,(ListItem*)sfd->ptr); //RIMUOVO IL PUNTATORE AL DESCRITTORE DALLA LISTA INTERNA AL SEMAFORO 
   
   //CONTROLLO CHE L'OPERAZIONE SIA ANDATA A BUON FINE
   if(!sdptr){
-	  printf("Errore nella rimozione del puntatore al descrittore\n");
+	  printf("ERRORE: rimozione del puntatore al descrittore non riuscita\n");
 	  return;
   }
+  
+  
+  
+  
+  
+  //LIBERO DALLA MEMORIA IL PUNTATORE AL DESCRITTORE DEL SEMAFORO
+  int ret = SemDescriptorPtr_free(sdptr);
+  if(ret){
+	  printf("ERRORE: Free del puntatore al fd %d non riuscita\n",sdptr->descriptor->fd);
+	  return;
+  }
+  
+  //LIBERO DALLA MEMORIA IL DESCRITTORE DEL SEMAFORO
+  ret = SemDescriptor_free(sfd);
+  if(ret){
+	  printf("ERRORE: Free del fd %d non riuscita\n",sfd->fd);
+	  return;
+  }
+  
+  /*ret = Semaphore_free(sem);
+  if(ret){
+	  printf("ERRORE: Free del semaforo %d non riuscita\n",sem->id);
+	  return;
+  }*/
+  
   
   running -> syscall_retvalue = 0;
   

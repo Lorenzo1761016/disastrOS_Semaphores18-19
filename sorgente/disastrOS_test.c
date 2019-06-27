@@ -60,7 +60,7 @@ void childFunction(void* args){
 		disastrOS_semWait(empty_sem);
 		disastrOS_semWait(read_sem);
 		
-		disastrOS_sleep(3);
+		//disastrOS_sleep(3);
 		
 		//SEZIONE CRITICA DI LETTURA
 		int val = buffer[read_index];
