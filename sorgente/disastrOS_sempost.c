@@ -24,7 +24,7 @@ void internal_semPost(){
   }
   
   (sfd->semaphore)->count++;  //INCREMENTO IL SUO CONTATORE
-  printf("[POST] Processo: %d - Semaforo: %d - Valore: %d\n", disastrOS_getpid(),(sfd->semaphore)->id, (sfd->semaphore)->count);
+  printf("[POST] Processo: %d - Semaforo: %d - Valore: From %d to %d\n", disastrOS_getpid(),(sfd->semaphore)->id, (sfd->semaphore)->count, (sfd->semaphore)->count+1);
   
   //VERIFICO SE IL CONTATORE DEL SEMAFORO E' MINORE DI ZERO
   if((sfd->semaphore)->count <= 0){

@@ -50,7 +50,7 @@ void childFunction(void* args){
 		write_index = (write_index+1)%BUFFER_LENGTH; //UTILIZZO UN BUFFER CIRCOLARE
 		var++;
 		
-		disastrOS_sleep(3);
+		disastrOS_sleep(1);
 		
 		disastrOS_semPost(write_sem);
 		disastrOS_semPost(empty_sem);
@@ -60,17 +60,25 @@ void childFunction(void* args){
 		disastrOS_semWait(empty_sem);
 		disastrOS_semWait(read_sem);
 		
-		//disastrOS_sleep(3);
 		
 		//SEZIONE CRITICA DI LETTURA
 		int val = buffer[read_index];
 		read_index = (read_index+1)%BUFFER_LENGTH; // UTILIZZO UN BUFFER CIRCOLARE
+		
+		disastrOS_sleep(1);
 		
 		printf("[READ] VALORE LETTO NELLA CELLA %d DEL BUFFER: %d\n", read_index,val);
 		
 		disastrOS_semPost(read_sem);
 		disastrOS_semPost(full_sem);
 		}
+		
+		printf("BUFFER\n");
+		int i;
+		for(i = 0;i<BUFFER_LENGTH;i++){
+			printf("%d ",buffer[i]);
+		}
+		printf("\n");
 	}
 		
 		
@@ -114,7 +122,8 @@ void initFunction(void* args) {
 	   pid, retval, alive_children);
     --alive_children;
   }
-  printf("shutdown!");
+  
+  printf("shutdown!\n");
   disastrOS_shutdown();
 }
 
