@@ -10,7 +10,7 @@ void internal_semPost(){
   int sd = running->syscall_args[0];
   
   if(sd < 0) {
-	  printf("ERRRR\n");
+	  printf("ERRORE: valore del fd non ammesso\n");
 	  return;
   }
   
@@ -23,8 +23,9 @@ void internal_semPost(){
 	  return;
   }
   
-  (sfd->semaphore)->count++;  //INCREMENTO IL SUO CONTATORE
   printf("[POST] Processo: %d - Semaforo: %d - Valore: From %d to %d\n", disastrOS_getpid(),(sfd->semaphore)->id, (sfd->semaphore)->count, (sfd->semaphore)->count+1);
+  (sfd->semaphore)->count++;  //INCREMENTO IL SUO CONTATORE
+  
   
   //VERIFICO SE IL CONTATORE DEL SEMAFORO E' MINORE DI ZERO
   if((sfd->semaphore)->count <= 0){

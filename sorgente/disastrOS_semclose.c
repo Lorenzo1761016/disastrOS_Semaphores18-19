@@ -7,9 +7,8 @@
 #include "disastrOS_semdescriptor.h"
 
 void internal_semClose(){
-  int sd= running->syscall_args[0]; 
+  int sd= running->syscall_args[0];
   
-  printf("Chiudo il semaforo con fd: %d...\n",sd);
   SemDescriptor* sfd = SemDescriptorList_byFd(&running->sem_descriptors,sd); //RICERCO IL DESCRITTORE DEL SEMAFORO DALLA LISTA DEL PROCESSO
   
   //CONTROLLO SE IL FD E' PRESENTE, ALTRIMENTI TERMINO
@@ -17,6 +16,8 @@ void internal_semClose(){
 	  printf("ERRORE: fd: %d non trovato\n", sd);
 	  return;
   }
+  
+  printf("Chiudo il fd %d del semaforo %d...\n",sd,sfd->semaphore->id);
  
   sfd = (SemDescriptor*)List_detach(&running->sem_descriptors,(ListItem*)sfd); //LO RIMUOVO DALLA LISTA DEI DESCRITTORI DEL PROCESSO
   if(!sfd){
@@ -48,8 +49,10 @@ void internal_semClose(){
 	  return;
   }
   
+  
   //QUANDO IL SEMAFORO NON HA PIU' DESCRITTORI ATTIVI LO RIMUOVO DALLA LISTA DEL PROCESSO E LO DEALLOCO
   if(sem->descriptors.size == 0 && sem->waiting_descriptors.size == 0){
+	  printf("Chiudo il semaforo %d...\n", sem->id);
 	  Semaphore* aux = (Semaphore*)List_detach(&semaphores_list,(ListItem*)sem);
 	  if(!aux){
 		  printf("ERRORE: Rimozione del semaforo: %d non riuscita\n",aux->id);
@@ -60,14 +63,14 @@ void internal_semClose(){
 		  printf("ERRORE: Free del semaforo %d non riuscita\n",sem->id);
 		  return;
 	  }
+	  
+	  disastrOS_printStatus();
+	  
   }
   
   
   
-  running -> syscall_retvalue = 0;
-  
-  printf("Fatto!\n");
-  
+  running -> syscall_retvalue = 0; 
   
   
 }

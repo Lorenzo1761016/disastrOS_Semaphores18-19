@@ -4,6 +4,7 @@
 #include "disastrOS.c"
 
 #define BUFFER_LENGTH 50
+#define ITERATION 10
 
 int buffer[BUFFER_LENGTH];
 int write_index = 0;
@@ -35,7 +36,7 @@ void childFunction(void* args){
   int read_sem = disastrOS_semOpen(3,1);
   int write_sem = disastrOS_semOpen(4,1);
 
-  for (int i=0; i<10; ++i){  
+  for (int i=0; i<ITERATION; ++i){  
 	
     printf("PID: %d, iterate %d\n", disastrOS_getpid(), i);  
     
@@ -50,7 +51,7 @@ void childFunction(void* args){
 		write_index = (write_index+1)%BUFFER_LENGTH; //UTILIZZO UN BUFFER CIRCOLARE
 		var++;
 		
-		disastrOS_sleep(1);
+		//disastrOS_sleep(1);
 		
 		disastrOS_semPost(write_sem);
 		disastrOS_semPost(empty_sem);
@@ -65,7 +66,7 @@ void childFunction(void* args){
 		int val = buffer[read_index];
 		read_index = (read_index+1)%BUFFER_LENGTH; // UTILIZZO UN BUFFER CIRCOLARE
 		
-		disastrOS_sleep(1);
+		//disastrOS_sleep(1);
 		
 		printf("[READ] VALORE LETTO NELLA CELLA %d DEL BUFFER: %d\n", read_index,val);
 		
@@ -96,7 +97,8 @@ void childFunction(void* args){
 void initFunction(void* args) {
   disastrOS_printStatus();
   printf("hello, I am init and I just started\n");
-  disastrOS_spawn(sleeperFunction, 0);
+  //disastrOS_spawn(sleeperFunction, 0);
+  int fd[10];
   
 
   printf("I feel like to spawn 10 nice threads\n");
@@ -106,13 +108,11 @@ void initFunction(void* args) {
     int mode=DSOS_CREATE;
     printf("mode: %d\n", mode);
     printf("opening resource (and creating if necessary)\n");
-    int fd=disastrOS_openResource(i,type,mode);
-    printf("fd=%d\n", fd);
+    fd[i]=disastrOS_openResource(i,type,mode);
+    printf("fd=%d\n", fd[i]);
     disastrOS_spawn(childFunction, 0);
     alive_children++;
   }
-
-  disastrOS_printStatus();
   
   int retval;
   int pid;
@@ -123,6 +123,26 @@ void initFunction(void* args) {
     --alive_children;
   }
   
+  printf("DEALLOCO LE RISORSE...\n");
+  //CHIUDO E DEALLOCO LE RISORSE QUANDO TUTTI I PROCESSI HANNO SVOLTO LA LORO ATTIVITA'
+  int i;
+  for (i = 0; i <ITERATION; ++i)
+  {
+	printf("Dealloco la risorsa %d...\n",fd[i]);
+	disastrOS_closeResource(fd[i]);
+	disastrOS_destroyResource(i);
+	disastrOS_printStatus();
+  }
+  
+  
+  printf("STATO FINALE DEL SISTEMA:\n");
+  disastrOS_printStatus();
+  
+  printf("BUFFER DOPO LE OPERAZIONI DI SCRITTURA...\n");
+  for(i=0;i<BUFFER_LENGTH;i++){
+	  printf("%d ", buffer[i]);
+  }
+  printf("\n");
   printf("shutdown!\n");
   disastrOS_shutdown();
 }
@@ -140,6 +160,5 @@ int main(int argc, char** argv){
   // spawn an init process
   printf("start\n");
   disastrOS_start(initFunction, 0, logfilename);
-  //disastrOS_start(initFunction, 0, logfilename);
   return 0;
 }

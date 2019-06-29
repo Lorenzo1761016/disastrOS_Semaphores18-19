@@ -14,20 +14,21 @@ void internal_semOpen(){
   
   //VERIFICO CHE L'ID DEL SEMAFORO NON SIA NEGATIVO
   if (semnum < 0){
-	  printf("Errore id semaforo");
+	  printf("ERRORE: id semaforo non valido");
 	  return;
   }
   
-  printf("Creo il semaforo %d...\n", semnum);
   
   Semaphore* aux = SemaphoreList_byId(&semaphores_list,semnum); //VERIFICO SE IL SEMAFORO (SEMNUM) E' GIA' PRESENTE NELLA LISTA DEI SEMAFORI
   
   if (aux == NULL) {
+	  printf("Creo il semaforo %d...\n", semnum);
 	  aux = Semaphore_alloc(semnum,counter);  //SE IL SEMAFORO (SEMNUM) NON ESISTE LO ALLOCO
 	  if(!aux){
 		  printf("ERRORE: Allocazione semaforo fallita\n");
 		  return;
 	  }
+	  printf("Apro un descriptor per il semaforo %d...\n",semnum);
 	  List_insert(&semaphores_list,semaphores_list.last,(ListItem*)aux); //INSERISCO IL SEMAFORO (SEMNUM) ALLA LISTA DEI SEMAFORI
 	  }
 
@@ -57,6 +58,6 @@ void internal_semOpen(){
   
   running->syscall_retvalue = sfd->fd; //ASSEGNO COME VALORE DI RITORNO DELLA SYSCALL IL FILE DESCRIPTOR DEL SEMAFORO 
 	
-  printf("Fatto!\n");	  
+  disastrOS_printStatus();	  
 }
 

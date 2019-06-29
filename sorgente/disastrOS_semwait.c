@@ -10,7 +10,7 @@ void internal_semWait(){
   int sd = running->syscall_args[0];
   
   if(sd < 0){
-	  printf("ERRRR");
+	  printf("ERRORE: valore del fd non ammesso\n");
 	  return;
   }
   
@@ -21,8 +21,10 @@ void internal_semWait(){
 	  printf("ERRORE: Il file descriptor %d non esiste\n",sd);	
 	  return;
   }
-  (sfd->semaphore)->count--;
+  
   printf("[WAIT] Processo: %d - Semaforo: %d - Valore: From %d to %d\n", disastrOS_getpid(),(sfd->semaphore)->id, (sfd->semaphore)->count,(sfd->semaphore)->count-1);
+  (sfd->semaphore)->count--;
+  
   
   //VERIFICO SE IL CONTATORE DEL SEMAFORO SCENDE SOTTO LO ZERO
   if((sfd->semaphore)->count < 0){
