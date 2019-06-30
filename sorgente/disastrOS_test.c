@@ -9,7 +9,7 @@
 int buffer[BUFFER_LENGTH];
 int write_index = 0;
 int read_index = 0;
-int var = 0;
+int var = 1;
 
 // we need this to handle the sleep state
 void sleeperFunction(void* args){
@@ -51,7 +51,7 @@ void childFunction(void* args){
 		write_index = (write_index+1)%BUFFER_LENGTH; //UTILIZZO UN BUFFER CIRCOLARE
 		var++;
 		
-		//disastrOS_sleep(1);
+		disastrOS_sleep(20);
 		
 		disastrOS_semPost(write_sem);
 		disastrOS_semPost(empty_sem);
@@ -66,7 +66,7 @@ void childFunction(void* args){
 		int val = buffer[read_index];
 		read_index = (read_index+1)%BUFFER_LENGTH; // UTILIZZO UN BUFFER CIRCOLARE
 		
-		//disastrOS_sleep(1);
+		disastrOS_sleep(20);
 		
 		printf("[READ] VALORE LETTO NELLA CELLA %d DEL BUFFER: %d\n", read_index,val);
 		
@@ -97,7 +97,7 @@ void childFunction(void* args){
 void initFunction(void* args) {
   disastrOS_printStatus();
   printf("hello, I am init and I just started\n");
-  //disastrOS_spawn(sleeperFunction, 0);
+  disastrOS_spawn(sleeperFunction, 0);
   int fd[10];
   
 
