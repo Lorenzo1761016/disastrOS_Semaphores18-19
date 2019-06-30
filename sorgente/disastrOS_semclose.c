@@ -68,7 +68,7 @@ void internal_semClose(){
 	  
   }
   
-  
+  running->last_sem_fd--; //DECREMENTO IL CONTATORE DEI DESCRITTORI ATTIVI DEL PROCESSO
   
   running -> syscall_retvalue = 0; 
   

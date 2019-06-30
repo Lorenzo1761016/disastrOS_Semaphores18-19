@@ -1,0 +1,22 @@
+﻿DISASTROS_SEMAPHORES
+-WHAT:
+Il progetto consiste nell’implementazione dei semafori e delle funzioni che li regolano nel sistema operativo disastrOS.
+Un semaforo è un tipo di dato astratto che permette ai processi di accedere ad una risorsa condivisa o alla sezione critica di un programma (nel nostro caso operazione di lettura/scrittura su un buffer condiviso) in mutua esclusione e in modo sincronizzato.
+Un semaforo consiste in una variabile intera e sfrutta due operazioni:
+1) WAIT: quando un processo vuole accedere alla sezione critica o richiedere accesso alla  risorsa viene eseguita una wait sul semaforo e il suo contatore viene decrementato;
+2)POST: quando un processo abbandona  la sezione critica o rilascia la risorsa viene eseguita una post sul semaforo e il suo contatore viene incrementato.
+
+-HOW:
+Sono state implementate all’interno del codice sorgente del sistema quattro operazioni che gestiscono il funzionamento dei semafori:
+
+1)semOpen: crea un semaforo con un id e un contatore scelti dall’utente. Se il semaforo in questione è già presente nella lista globale dei semafori apre solamente un nuovo descrittore (che viene inserito anche come entry della lista dei descrittori del processo corrente), altrimenti lo alloca  e lo aggiunge alla lista dei semafori.
+La semOpen inoltre crea un puntatore al descrittore, che serve da entry nella lista dei descrittori attivi del semaforo.
+Infine incrementa il contatore dei descrittori attivi del processo in esecuzione e imposta come valore di ritorno il file descriptor del semaforo appena aperto.
+Nella semOpen sono inclusi dei controlli d’errore relativi al valore dell’ id e all’allocazione delle risorse (semafori, descriptor, puntatori a descriptor).
+
+2)semClose: dato in input il file descriptor di un semaforo lo rimuove e lo dealloca dalla lista dei descrittori del processo in esecuzione. Rimuove e dealloca anche il puntatore al descriptor nella lista dei descrittori attivi del semaforo, e se il semaforo non ha più descrittori attivi lo rimuove dalla lista globale e lo dealloca.
+Infine decrementa il contatore dei descrittori attivi e imposta come valore di ritorno 0.
+Nella semClose sono inclusi controlli d’errore relativi alla validità dell’input e alla rimozione e deallocazione delle risorse (descriptor, puntatori a descriptor, semafori).
+
+3)semWait: 
+
