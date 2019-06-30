@@ -11,12 +11,19 @@ Sono state implementate all’interno del codice sorgente del sistema quattro op
 
 1)semOpen: crea un semaforo con un id e un contatore scelti dall’utente. Se il semaforo in questione è già presente nella lista globale dei semafori apre solamente un nuovo descrittore (che viene inserito anche come entry della lista dei descrittori del processo corrente), altrimenti lo alloca  e lo aggiunge alla lista dei semafori.
 La semOpen inoltre crea un puntatore al descrittore, che serve da entry nella lista dei descrittori attivi del semaforo.
-Infine incrementa il contatore dei descrittori attivi del processo in esecuzione e imposta come valore di ritorno il file descriptor del semaforo appena aperto.
-Nella semOpen sono inclusi dei controlli d’errore relativi al valore dell’ id e all’allocazione delle risorse (semafori, descriptor, puntatori a descriptor).
+Infine incrementa il contatore dei descrittori attivi del processo in esecuzione e se ha funzionato tutto correttamente imposta come valore di ritorno il file descriptor del semaforo appena aperto.
 
 2)semClose: dato in input il file descriptor di un semaforo lo rimuove e lo dealloca dalla lista dei descrittori del processo in esecuzione. Rimuove e dealloca anche il puntatore al descriptor nella lista dei descrittori attivi del semaforo, e se il semaforo non ha più descrittori attivi lo rimuove dalla lista globale e lo dealloca.
-Infine decrementa il contatore dei descrittori attivi e imposta come valore di ritorno 0.
-Nella semClose sono inclusi controlli d’errore relativi alla validità dell’input e alla rimozione e deallocazione delle risorse (descriptor, puntatori a descriptor, semafori).
+Infine decrementa il contatore dei descrittori attivi e se ha funzionato tutto correttamente imposta il valore di ritorno a zero.
 
-3)semWait: 
+3)semWait: dato in input il file descriptor, decrementa il contatore del semaforo ad esso associato. Se il contatore diventa negativo inoltre sposta il descrittore e il processo nelle rispettive liste di attesa, imposta lo stato del processo corrente in Waiting e mette in esecuzione un nuovo processo, più precisamente il primo della lista dei processi nello stato di Ready (fondamentalmente esegue un context switch).
+Infine se ha funzionato tutto correttamente imposta il valore di ritorno a zero.
 
+4)semPost: dato in input il file descriptor, incrementa il contatore del semaforo ad esso associato. Se dopo l’incremento il contatore è ancora negativo o nullo sposta il descrittore e il processo nelle rispettive ready queue e imposta lo stato del processo corrente in Ready.
+Infine se ha funzionato tutto correttamente imposta il valore di ritorno a zero.
+
+È stato inoltre implementato nel programma di test un esempio del funzionamento dei semafori ispirato ad un modello con n produttori e n consumatori nel quale un buffer di 50 elementi inizializzati a 0 subisce operazioni di lettura e scrittura  da più processi in modo sincronizzato grazie all’utilizzo dei semafori e delle funzioni appena descritte.
+
+
+-HOW TO RUN: 
+Per eseguire il test è sufficiente recarsi nella cartella ‘sorgente’, compilare tutti i file con ‘make’ ed eseguire il programma di test con ‘./disastrOS_test’.

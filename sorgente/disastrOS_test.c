@@ -51,7 +51,7 @@ void childFunction(void* args){
 		write_index = (write_index+1)%BUFFER_LENGTH; //UTILIZZO UN BUFFER CIRCOLARE
 		var++;
 		
-		disastrOS_sleep(20);
+		disastrOS_sleep(10);
 		
 		disastrOS_semPost(write_sem);
 		disastrOS_semPost(empty_sem);
@@ -66,7 +66,7 @@ void childFunction(void* args){
 		int val = buffer[read_index];
 		read_index = (read_index+1)%BUFFER_LENGTH; // UTILIZZO UN BUFFER CIRCOLARE
 		
-		disastrOS_sleep(20);
+		disastrOS_sleep(10);
 		
 		printf("[READ] VALORE LETTO NELLA CELLA %d DEL BUFFER: %d\n", read_index,val);
 		

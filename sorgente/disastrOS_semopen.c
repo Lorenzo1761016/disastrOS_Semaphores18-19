@@ -47,12 +47,20 @@ void internal_semOpen(){
 	  return;
   }
   
-  List_insert(&running->sem_descriptors, running->sem_descriptors.last, (ListItem*)sfd); //AGGIUNGO IL DESCRITTORE SFD ALLA LISTA DEI DESCRITTORI DEI SEMAFORI
-   
+  SemDescriptor* ret = (SemDescriptor*)List_insert(&running->sem_descriptors, running->sem_descriptors.last, (ListItem*)sfd); //AGGIUNGO IL DESCRITTORE SFD ALLA LISTA DEI DESCRITTORI DEI SEMAFORI
+  if(!ret){
+	  printf("ERRORE: inserimento del descrittore nella lista dei descrittori del processo fallito\n");
+	  running->syscall_retvalue = -1;
+	  return;
+  }
   sfd->ptr = sfdptr; //INSERISCO IL PUNTATORE AL DESCRITTORE ALL'INTERNO DELLA STRUCT DEL DESCRITTORE
   
-  List_insert(&aux->descriptors,aux->descriptors.last,(ListItem*)(sfd->ptr));  //AGGIUNGO IL PUNTATORE AL DESCRITTORE DEL SEMAFORO NELLA LISTA DEI DESCRITTORI DEL SEMAFORO CORRENTE
-  
+  SemDescriptorPtr* aux_ptr = (SemDescriptorPtr*)List_insert(&aux->descriptors,aux->descriptors.last,(ListItem*)(sfd->ptr));  //AGGIUNGO IL PUNTATORE AL DESCRITTORE DEL SEMAFORO NELLA LISTA DEI DESCRITTORI DEL SEMAFORO CORRENTE
+  if(!aux_ptr){
+	  printf("ERRORE: inserimento del puntatore a descrittore nella lista dei descrittori del semaforo fallito\n");
+	  running->syscall_retvalue = -1;
+	  return;
+  }
   (running->last_sem_fd)++; //INCREMENTO IL CONTATORE INTERNO AL PCB DEI SEMAFORI APERTI
   
   running->syscall_retvalue = sfd->fd; //ASSEGNO COME VALORE DI RITORNO DELLA SYSCALL IL FILE DESCRIPTOR DEL SEMAFORO 

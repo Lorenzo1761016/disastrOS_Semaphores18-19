@@ -14,6 +14,7 @@ void internal_semClose(){
   //CONTROLLO SE IL FD E' PRESENTE, ALTRIMENTI TERMINO
   if(!sfd){
 	  printf("ERRORE: fd: %d non trovato\n", sd);
+	  running->syscall_retvalue=-1;
 	  return;
   }
   

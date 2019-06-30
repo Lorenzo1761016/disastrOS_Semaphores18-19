@@ -8,12 +8,7 @@
 
 void internal_semPost(){
   int sd = running->syscall_args[0];
-  
-  if(sd < 0) {
-	  printf("ERRORE: valore del fd non ammesso\n");
-	  return;
-  }
-  
+
   SemDescriptor* sfd = SemDescriptorList_byFd(&running->sem_descriptors,sd); //RICERCO IL DESCRITTORE DEL SEMAFORO NELLA LISTA DEL PCB
   
   //VERIFICO CHE SIA PRESENTE, ALTRIMENTI TERMINO
@@ -32,15 +27,33 @@ void internal_semPost(){
 	  
 	  //SPOSTO IL SUO DESCRITTORE NELLA LISTA DI READY
 	  SemDescriptorPtr* ptr_aux = (SemDescriptorPtr*)List_detach(&(sfd->semaphore)->waiting_descriptors,(sfd->semaphore)->waiting_descriptors.first);
-	  List_insert(&(sfd->semaphore)->descriptors,(sfd->semaphore)->descriptors.last,(ListItem*)ptr_aux);
+	  if(!ptr_aux){
+		  printf("ERRORE: rimozione del descrittore dalla lista di waiting del semaforo fallita\n");
+		  running->syscall_retvalue = -1;
+		  return;
+	  }
+	  SemDescriptorPtr* ret = (SemDescriptorPtr*)List_insert(&(sfd->semaphore)->descriptors,(sfd->semaphore)->descriptors.last,(ListItem*)ptr_aux);
+	  if(!ret){
+		  printf("ERRORE: inserimento del puntatore a descrittore nella lista dei descrittori del semaforo fallito\n");
+		  running->syscall_retvalue=-1;
+	  }
 
 	  //IMPOSTO LO STATO DEL PCB DEL PROCESSO IN READY
 	  PCB* exec_PCB = ptr_aux->descriptor->pcb;
 	  exec_PCB->status = Ready;
 	  
 	  //SPOSTO IL PCB DEL PROCESSO NELLA READY QUEUE DEL SISTEMA OPERATIVO
-	  List_detach(&waiting_list,(ListItem*)exec_PCB);
-	  List_insert(&ready_list,ready_list.last,(ListItem*)exec_PCB);
+	  PCB* pcb_aux = (PCB*)List_detach(&waiting_list,(ListItem*)exec_PCB);
+	  if(!pcb_aux){
+		  printf("ERRORE: rimozione del processo dalla waiting list fallita\n");
+		  running->syscall_retvalue=-1;
+	  }
+	  
+	  pcb_aux = (PCB*)List_insert(&ready_list,ready_list.last,(ListItem*)exec_PCB);
+	  if(!pcb_aux){
+		  printf("ERRORE: inserimento del processo nella ready queue fallito\n");
+		  running->syscall_retvalue = -1;
+	  }
   }
   //SETTO IL VALORE DI RITORNO DELLA SYSCALL
   running->syscall_retvalue = 0;

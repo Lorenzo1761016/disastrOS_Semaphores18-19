@@ -9,16 +9,12 @@
 void internal_semWait(){
   int sd = running->syscall_args[0];
   
-  if(sd < 0){
-	  printf("ERRORE: valore del fd non ammesso\n");
-	  return;
-  }
-  
   SemDescriptor* sfd = SemDescriptorList_byFd(&running->sem_descriptors,sd); //RICERCO IL DESCRITTORE DEL SEMAFORO NELLA LISTA DEL PCB
   
   //VERIFICO CHE SIA PRESENTE, ALTRIMENTI TERMINO
   if(!sfd){
 	  printf("ERRORE: Il file descriptor %d non esiste\n",sd);	
+	  running->syscall_retvalue=-1;
 	  return;
   }
   
@@ -30,18 +26,37 @@ void internal_semWait(){
   if((sfd->semaphore)->count < 0){
 	  
 	  //SPOSTO IL SUO DESCRITTORE NELLA LISTA DI WAITING
-	  List_detach(&sfd->semaphore->descriptors,(ListItem*)sfd->ptr);
-	  List_insert(&(sfd->semaphore)->waiting_descriptors,(sfd->semaphore)->waiting_descriptors.last,(ListItem*)sfd->ptr);
-  
+	  SemDescriptorPtr* aux = (SemDescriptorPtr*)List_detach(&sfd->semaphore->descriptors,(ListItem*)sfd->ptr);
+	  if(!aux){
+		  printf("ERRORE: rimozione del puntatore a descrittore dalla lista dei descrittori del semaforo fallita\n");
+		  running->syscall_retvalue=-1;
+	  }
+	  
+	  aux = (SemDescriptorPtr*)List_insert(&(sfd->semaphore)->waiting_descriptors,(sfd->semaphore)->waiting_descriptors.last,(ListItem*)sfd->ptr);
+	  if(!aux){
+		  printf("ERRORE: inserimento del puntatore a descrittore nella lista di waiting del semaforo fallito\n");
+		  running->syscall_retvalue=-1;
+		  return;
+	  }
 	  //IMPOSTO LO STATO DEL PCB DEL PROCESSO IN WAITING
 	  running->status = Waiting;
 	  
 	  //SPOSTO IL PCB DEL PROCESSO NELLA WAITING QUEUE DEL SISTEMA OPERATIVO
-	  List_insert(&waiting_list,waiting_list.last,(ListItem*)running);
+	  PCB* pcb_aux = (PCB*)List_insert(&waiting_list,waiting_list.last,(ListItem*)running);
+	  if(!pcb_aux){
+		  printf("ERRORE: inserimento del processo nella lista di attesa del sistema fallito\n");
+		  running->syscall_retvalue=-1;
+		  return;
+	  }
 	  
 	  //METTO IN ESECUZIONE UN NUOVO PROCESSO (IL PRIMO DELLA READY QUEUE)
-	  PCB* next_PCB = (PCB*)List_detach(&ready_list,(ListItem*)ready_list.first);
-	  running = next_PCB;
+	  pcb_aux = (PCB*)List_detach(&ready_list,(ListItem*)ready_list.first);
+	  if(!pcb_aux){
+		  printf("ERRORE: rimozione del processo dalla ready queue del sistema fallita\n");
+		  running->syscall_retvalue=-1;
+		  return;
+	  }
+	  running = pcb_aux;
   }
   
   running->syscall_retvalue = 0; //ASSEGNO UN VALORE DI RITORNO ALLA SYSCALL
