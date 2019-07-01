@@ -14,7 +14,7 @@ void internal_semWait(){
   //VERIFICO CHE SIA PRESENTE, ALTRIMENTI TERMINO
   if(!sfd){
 	  printf("ERRORE: Il file descriptor %d non esiste\n",sd);	
-	  running->syscall_retvalue=-1;
+	  running->syscall_retvalue= DSOS_ESEM_DES_LIST;
 	  return;
   }
   
@@ -29,13 +29,13 @@ void internal_semWait(){
 	  SemDescriptorPtr* aux = (SemDescriptorPtr*)List_detach(&sfd->semaphore->descriptors,(ListItem*)sfd->ptr);
 	  if(!aux){
 		  printf("ERRORE: rimozione del puntatore a descrittore dalla lista dei descrittori del semaforo fallita\n");
-		  running->syscall_retvalue=-1;
+		  running->syscall_retvalue= DSOS_ELIST_DETACH;
 	  }
 	  
 	  aux = (SemDescriptorPtr*)List_insert(&(sfd->semaphore)->waiting_descriptors,(sfd->semaphore)->waiting_descriptors.last,(ListItem*)sfd->ptr);
 	  if(!aux){
 		  printf("ERRORE: inserimento del puntatore a descrittore nella lista di waiting del semaforo fallito\n");
-		  running->syscall_retvalue=-1;
+		  running->syscall_retvalue= DSOS_ELIST_INSERT;
 		  return;
 	  }
 	  //IMPOSTO LO STATO DEL PCB DEL PROCESSO IN WAITING
@@ -45,7 +45,7 @@ void internal_semWait(){
 	  PCB* pcb_aux = (PCB*)List_insert(&waiting_list,waiting_list.last,(ListItem*)running);
 	  if(!pcb_aux){
 		  printf("ERRORE: inserimento del processo nella lista di attesa del sistema fallito\n");
-		  running->syscall_retvalue=-1;
+		  running->syscall_retvalue= DSOS_ELIST_INSERT;
 		  return;
 	  }
 	  
@@ -53,7 +53,7 @@ void internal_semWait(){
 	  pcb_aux = (PCB*)List_detach(&ready_list,(ListItem*)ready_list.first);
 	  if(!pcb_aux){
 		  printf("ERRORE: rimozione del processo dalla ready queue del sistema fallita\n");
-		  running->syscall_retvalue=-1;
+		  running->syscall_retvalue= DSOS_ELIST_DETACH;
 		  return;
 	  }
 	  running = pcb_aux;

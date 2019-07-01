@@ -11,10 +11,10 @@ void internal_semClose(){
   
   SemDescriptor* sfd = SemDescriptorList_byFd(&running->sem_descriptors,sd); //RICERCO IL DESCRITTORE DEL SEMAFORO DALLA LISTA DEL PROCESSO
   
-  //CONTROLLO SE IL FD E' PRESENTE, ALTRIMENTI TERMINO
+  //CONTROLLO SE IL FD È PRESENTE, ALTRIMENTI TERMINO
   if(!sfd){
 	  printf("ERRORE: fd: %d non trovato\n", sd);
-	  running->syscall_retvalue=-1;
+	  running->syscall_retvalue=DSOS_ESEM_DES_LIST;
 	  return;
   }
   
@@ -41,27 +41,31 @@ void internal_semClose(){
   int ret = SemDescriptorPtr_free(sdptr);
   if(ret){
 	  printf("ERRORE: Free del puntatore al fd %d non riuscita\n",sdptr->descriptor->fd);
+	  running->syscall_retvalue = DSOS_ESEM_DES_PTR_FREE;
 	  return;
   }
   //LIBERO DALLA MEMORIA IL DESCRITTORE DEL SEMAFORO
   ret = SemDescriptor_free(sfd);
   if(ret){
 	  printf("ERRORE: Free del fd %d non riuscita\n",sfd->fd);
+	  running->syscall_retvalue = DSOS_ESEM_DES_FREE;
 	  return;
   }
   
   
-  //QUANDO IL SEMAFORO NON HA PIU' DESCRITTORI ATTIVI LO RIMUOVO DALLA LISTA DEL PROCESSO E LO DEALLOCO
+  //QUANDO IL SEMAFORO NON HA PIÙ DESCRITTORI ATTIVI LO RIMUOVO DALLA LISTA DEL PROCESSO E LO DEALLOCO
   if(sem->descriptors.size == 0 && sem->waiting_descriptors.size == 0){
 	  printf("Chiudo il semaforo %d...\n", sem->id);
 	  Semaphore* aux = (Semaphore*)List_detach(&semaphores_list,(ListItem*)sem);
 	  if(!aux){
 		  printf("ERRORE: Rimozione del semaforo: %d non riuscita\n",aux->id);
+		  running->syscall_retvalue = DSOS_ELIST_DETACH;
 		  return;
 	  }
 	  ret = Semaphore_free(sem);
 	  if(ret){
 		  printf("ERRORE: Free del semaforo %d non riuscita\n",sem->id);
+		  running->syscall_retvalue = DSOS_ESEM_FREE;
 		  return;
 	  }
 	  
